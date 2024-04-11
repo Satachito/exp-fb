@@ -1,0 +1,494 @@
+
+//	外側がクリックされたら close
+//	,	dialog.onclick = ev => {
+//			const
+//			$ = dialog.getBoundingClientRect()
+//			;
+//			( ev.clientX < $.left || $.right < ev.clientX || ev.clientY < $.top || $.bottom < ev.clientY ) && dialog.close()
+//		}
+
+/*
+https://stackoverflow.com/questions/77171071/fetchsigninmethodsforemail-returns-empty-array-for-existing-user
+
+これは fetchSignInMethodsForEmail が2023/9 から動作しなくなったからだめ
+E( 'RESET_PASSWORD_B'	).onclick = () => fetchSignInMethodsForEmail( auth, EMAIL_I.value ).then(
+	_ => _.length && _[ 0 ] === 'password' 
+	?	SendPasswordResetEmail( E( 'EMAIL_I' ).value )
+	:	A( 'auth/user-not-found', E( 'EMAIL_I' ).value )
+).catch( AuthA )
+*/
+
+OnAuthStateChanged(
+	user => (
+		user && (
+		/*	Bearer を使って Functions を呼ぶ基本的な方法
+		,	user.getIdToken( true ).then(	//	auth の getIdToken( user, true ) も同じ
+				token => (
+					console.log( 'TOKEN:', token )
+				,	fetch(
+						location.hostname === 'localhost'
+						?	'http://localhost:5001/exp-fb-c223c/us-central1/tickerCoincheck'
+						:	'https://tickerCoincheck-jmabzvke5a-uc.a.run.app'
+					,	{  headers: { 'Authorization': 'Bearer ' + token } }
+					).then(
+						_ => _.json()
+					).then(
+						console.log
+					)
+				,	fetch(
+						location.hostname === 'localhost'
+						?	'http://localhost:5001/exp-fb-c223c/us-central1/tickerGMOCoin'
+						:	'https://tickerGMOCoin-jmabzvke5a-uc.a.run.app'
+					,	{  headers: { 'Authorization': 'Bearer ' + token } }
+					).then(
+						_ => _.json()
+					).then(
+						console.log
+					)
+				)
+			)
+		//	Firebase	
+			getDocs(
+				query(
+					collection( db, 'gmo' )
+				,	orderBy( 'responsetime', 'desc' )
+				,	limit( 10 )
+				)
+			).then(
+				_ => {
+					const
+					Select = symbol => _.docs.map( _ => _.data().data.filter( _ => _.symbol === symbol )[ 0 ] )
+					const
+					BTC = Select( 'BTC' )
+					console.log( BTC )
+				}
+			)
+		)
+	)
+)
+
+const {
+	onMessagePublished
+} = require( 'firebase-functions/v2/pubsub'		)
+
+/*
+@media ( min-width: 768px	) { main { max-width: 750px		} }
+@media ( min-width: 992px	) { main { max-width: 970px		} }
+@media ( min-width: 1200px	) { main { max-width: 1170px	} }
+*/
+
+
+
+261 //  user.emailVerified について
+262 //  google はデフォルトで verify されてる
+263 //  facebook は app id とapp secret が必要, あとOAuth リダイレクト URIをセットする
+264 //      https://firebase.google.com/docs/auth/web/facebook-login?hl=ja
+265
+266
+
+
+
+
+314 //  user-not-found 以外に以下のが返ってきたことがある。
+315 //  missing-password
+316 //  wrong-password
+317 //  invalid-email
+318 //  user-disabled
+319 //  too-many-requests
+320 //  invalid-email
+321
+308 //  operation-not-allowed   //  Facebook のとき
+
+
+
+
+
+324 /*
+325
+326 Starting in September 15 email enumeration protection is enabled by default for all new firebase projects.
+327 This actually breaks the fetchSignInMethodsForEmail method.
+328
+329 https://stackoverflow.com/questions/77171071/fetchsigninmethodsforemail-returns-empty-array-for-existing-user
+330
+331 email の重複を許さない設定にすると、google ログインから返ってくる情報にメアドが入らなくなる。
+332
+333
+334
+335 const
+336 LinkEmail = er => {
+337     if ( er.code === 'auth/account-exists-with-different-credential' ) {
+338 console.log( 'email:', er.customData.email )
+339         fetchSignInMethodsForEmail( auth, er.customData.email ).then(
+340             _ => {
+341 console.log( 'methods:', _ )
+342                 if ( _[ 0 ] === 'password' ) {
+343                     signInWithEmailAndPassword( auth, _.customData.email, prompt( 'input password' ) ).then(
+344                         _ => linkWithCredential( _.user, er.credential )
+345                     ).catch( _ => alert( _.message ) )
+346                 } else {
+347                     signInWithPopup( auth, getProviderForProviderId( _[ 0 ] ) ).then(
+348                         _ => linkWithCredential( _.user, er.credential )
+349                     )
+350                 }
+351             }
+352         ).catch( _ => alert( _.message ) )
+353     } else {
+354         alert( _.message )
+355     }
+356 }
+357 */
+358
+
+
+
+Firebase で始めるWebサービス
+　ログイン　Firebase/Auth
+　課金	Sprite
+　ホスティング	Firebase/Hosting
+　データ　Firebase/Firestore
+
+
+SPA を理解するためには SPA と合わせてHostring の rewrite モードをよく理解することが必要
+
+
+
+
+
+
+
+
+
+
+Firebase と Google Cloud の関係性
+
+FirebaseとGoogleアカウントは、同じアカウントシステムを使用します。FirebaseはGoogleのプラットフォームの一部であり、Googleアカウントを使ってFirebaseにログインすることができます。つまり、Firebaseにアクセスするために新しいアカウントを作成する必要はありません。もし既にGoogleアカウントを持っていれば、そのアカウントを使ってFirebaseのサービスにアクセスすることが可能です。Firebaseを利用するには、GoogleアカウントでFirebaseのウェブサイトにログインし、プロジェクトを作成することから始めます。FirebaseのコンソールはGoogle Cloud Platformのコンソールと密接に統合されており、FirebaseのプロジェクトはGoogle Cloud Platformのプロジェクトとしても扱われます。
+
+FirebaseとGoogleアカウントは基本的に同一のものです。FirebaseはGoogle Cloudの一部であり、Firebaseプロジェクトを作成する際に使用するGoogleアカウントはGoogle Cloudプロジェクトと連携しています。つまり、Firebaseを使用するにはGoogleアカウントが必要であり、そのアカウントを使ってGoogle Cloud Platform(GCP)のリソースやサービスにもアクセスできます。
+
+FirebaseからGoogle Cloudの機能にアクセスすることは可能です。Firebaseプロジェクトは背後でGoogle Cloudプロジェクトに紐づいており、Firebaseで利用できる多くのサービスはGoogle Cloudのサービスをベースとしています。例えば、Firebase AuthenticationはGoogle CloudのIdentity Platformに、Firebase FirestoreやFirebase Realtime DatabaseはGoogle Cloud FirestoreとFirebase Realtime Databaseのサービスにそれぞれ基づいています。
+
+Firebaseコンソールから直接Google Cloud Platformコンソールにアクセスすることもでき、Firebaseプロジェクトに関連するGoogle Cloudのリソースやサービスを管理することができます。Firebaseで提供されていないGoogle Cloudのサービスや機能をプロジェクトに統合することも可能です。これにより、開発者はFirebaseの簡単なセットアップと直感的なUIを利用しつつ、必要に応じてGoogle Cloudの高度な機能にアクセスできるようになります。
+
+
+
+Firebaseを使用するメリットは多岐にわたりますが、主に以下の点が挙げられます：
+
+迅速な開発プロセス: Firebaseは多数の開発ツールと統合サービスを提供しており、これによりアプリの開発とリリースの速度を大幅に向上させることができます。例えば、認証、データベース、アナリティクス、ホスティングなどの機能を簡単に統合できます。
+
+スケーラブルなインフラストラクチャ: FirebaseはGoogle Cloud Platform上に構築されているため、アプリが成長しても容易にスケールアップできます。データベースやストレージなどのサービスは使用量に応じて自動的にスケーリングされます。
+
+リアルタイムデータベース: Firebase Realtime DatabaseとCloud Firestoreはリアルタイムでデータを同期させることができるため、動的なコンテンツやインタラクティブな機能を持つアプリケーションの開発が容易になります。
+
+豊富な統合機能: FirebaseはGoogle Ads、Google Marketing Platform、Google AdMobなどの他のGoogleサービスと簡単に統合できます。これにより、アプリのマーケティングや収益化の効率を高めることができます。
+
+強力なアナリティクス: Firebase Analyticsはユーザー行動の深い洞察を提供し、アプリのパフォーマンスを最適化するためのデータ駆動型の意思決定をサポートします。
+
+クロスプラットフォームサポート: FirebaseはiOS、Android、Webアプリケーションをサポートしており、複数のプラットフォームにまたがる開発を容易にします。
+
+セキュリティとプライバシー: FirebaseはGoogleのセキュリティ基準に準拠しており、アプリとユーザーデータの安全を保護します。また、Firebase Authenticationは多様な認証方法を提供し、セキュリティを強化します。
+
+コスト効率: Firebaseの多くのサービスは使った分だけ料金が発生するため、スタートアップや小規模プロジェクトにとってコスト効率が良いです。また、無料プランでも多くの機能を利用できます。
+
+これらのメリットにより、Firebaseは幅広い規模のプロジェクトでのアプリ開発に適しており、開発者がより迅速に、効率的に、そしてセキュアにアプリを構築・運用できるよう支援します。
+
+
+
+
+ランニングコストが問題になってくる規模に成長したら、Google Cloud に乗り換えるのも手でしょう。そのステージに達していたら乗り換えるのにそれほど手間がかからないことに驚くでしょう。
+
+
+準備
+
+Firebase CLIのインストール
+npm install -g firebase-tools
+
+
+
+
+
+
+
+Paso a paso
+
+
+Firebase に登録してプロジェクトを作る。(exp-fb)
+プロジェクトは Blaze プランにしておく（最初はほぼ無料枠でいけるはず）
+Firestore と Storage は開始しておく,
+realtime database はしなくてだいじょうぶ
+Authentication も開始しておく
+
+
+
+
+ローカルにフォルダを作る（exp-fb）
+firebase init
+npm init
+
+まずは apiKey を入れて
+　デプロイ
+firebase deploy --only hosting
+
+% firebase emulators:start
+実は java が必要
+macOS の新しいバージョンでは AirPlay が 5000と7000のポートを使っている場合があるから
+AirPlay をとめるか、FireStoreとHosting. のアドレスを別のに（例えば5001 と7001）指定する
+
+
+
+
+Vanilla.js
+
+Authから
+
+
+
+
+
+
+
+Payment
+さいきんはPayment Request APIなんてなのがあるから取り入れたい
+
+
+
+Firebase の注意点
+
+先に firebase console でプロジェクトをつくって、firestore と storage を作っておく（ルールはテストで設定）
+firebase login
+firebase init
+
+ここだけ、デフォルトとちがう
+=== Hosting Setup
+? Configure as a single-page app (rewrite all urls to /index.html)? Yes
+
+GitHub によるやつ
+
+
+SPA Router の作り方
+
+Hash を使う
+	http://example.com/#my_page みたいな
+	簡単に書けるがブラウザの履歴に残せない
+
+Pathname を使う
+	http://example.com/my_page みたいな
+	ブラウザの履歴に残せるがサーバーに設定が必要
+
+Webアプリケーションのルーターを設計する際、hash (#) を使う方法と pathname を使う方法の選択は、アプリケーションの要件と目的に応じて異なります。以下は、それぞれのアプローチの特徴と適用シナリオを説明します。
+
+Hash（#）を使う方法
+互換性: 古いブラウザとの互換性が必要な場合、hashを使う方法が好ましいです。Hashを使ったルーティングは、HTML5のHistory APIをサポートしていないブラウザでも動作します。
+シンプルなサーバー設定: ページのリロード時にサーバーに送られるのは、URLのhashより前の部分だけです。そのため、SPA（シングルページアプリケーション）であっても、サーバー側で特別なルーティング設定をする必要がありません。
+用途: 主にクライアントサイドで完結する動的なページ遷移に適しています。
+Pathnameを使う方法
+クリーンなURL: Pathnameを使う方法は、よりクリーンで親しみやすいURLを提供します。SEO（検索エンジン最適化）やユーザビリティの観点から好まれることが多いです。
+History API: HTML5のHistory APIを使用して、ブラウザの履歴とインタラクションするため、よりリッチなユーザーエクスペリエンスを提供できます。
+サーバー設定: Pathnameを使う場合、サーバー側で適切なリダイレクト設定を行う必要があります。ユーザーが直接URLを入力したり、ブックマークからアクセスしたりした場合に、適切なコンテンツを提供するためです。
+どちらを選ぶべきか
+SEOが重要な場合やクリーンなURLを好む場合は、pathnameを使用します。
+互換性やシンプルなサーバー設定を優先する場合は、hashを使用する方が良いでしょう。
+最終的な選択は、プロジェクトの具体的な要件と目標に基づいて行うべきです。
+
+
+ブラウザの履歴に残すためにはSPAがハンドルするルートへのリクエストをindex.html にリライトする設定が必要
+
+* Nginx だとnginx.confに以下のようなリライトルールを追加する
+
+```
+location / {
+    try_files $uri $uri/ /index.html;
+}
+```
+
+* firebase の場合、Hosting に以下のようなリライトルールを追加する
+
+```
+"rewrites": [
+	{	"source": "**" ,
+		"destination": "/index.html"
+	}
+]
+```
+
+
+        <ul>
+            <li>縦スタック：レスポンシブデザイン</li>
+            <li>Google を使ったユーザー認証</li>
+        </ul>
+
+        1Vanilla JS による SPA (Single Page Application)
+        このモックを使うには、Firebase Hosting の設定で「全てのURLをindex.htmlにrewriteする」という設定にする必要があります。
+        0具体的には firebase.json のhostingセクションに以下のようにrewritesを付け加えます。　
+        <pre style="background-color: lightgray"><code>
+"hosting": {
+    "public": "public",
+    "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+    ],
+    "rewrites": [
+        {   "source": "**",
+            "destination": "/index.html"
+        }
+    ]
+},
+        </code></pre>
+        ソースコードは <a href=https://github.com/Satachito/exp-fb>https://github.com/Satachito/exp-fb</a> にあります。
+
+グッズ
+
+
+designerbot-api-1     |   File "/api/designerai/main.py", line 296, in login
+designerbot-api-1     |     user = get_user_by_uniqueid(db, unique_id)
+designerbot-api-1     |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+designerbot-api-1     |   File "/api/designerai/models.py", line 102, in get_user_by_uniqueid
+designerbot-api-1     |     return db.query(User).filter(User.unique_id == unique_id).first()
+designerbot-api-1     |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+/*  vv  MENU BAR */
+.menuBar {
+;   overflow                : scroll
+;   background-color        : #333
+;   display                 : flex
+}
+.menuItem {
+;   background-color        : #333
+;   color                   : white
+;   padding                 : 16px
+}
+.menu:hover .menuItem {
+;   background-color        : #555
+}
+.submenu {
+;   display                 : none
+;   position                : absolute
+;   background-color        : #f9f9f9
+;   min-width               : 160px
+;   box-shadow              : 0px 8px 16px 0px rgba( 0, 0, 0, 0.2 )
+}
+.menu:hover .submenu {
+;   display                 : block
+}
+.submenuItem {
+;   padding                 : 12px 16px
+}
+.submenuItem:hover {
+;   background-color        : #f1f1f1
+}
+/*  ^^  MENU BAR */
+
+
+<div class="menuBar">
+    <div class="menu">
+        <div class="menuItem">MenuItem 1</div>
+        <div class="submenu">
+            <div class=submenuItem>SubMenuItem 1</div>
+            <div class=submenuItem>SubMenuItem 2</div>
+            <div class=submenuItem>SubMenuItem 3</div>
+        </div>
+    </div>
+    <div class="menu">
+        <div class="menuItem">MenuItem 2</div>
+        <div class="submenu">
+            <div class=submenuItem>SubMenuItem 1</div>
+            <div class=submenuItem>SubMenuItem 2</div>
+            <div class=submenuItem>SubMenuItem 3</div>
+        </div>
+    </div>
+</div>
+
+
+
+
+/*                                                  vv  JP MENU BAR */
+.jpMenuBar {
+;   overflow                : scroll
+;   background-color        : midnightblue
+;   color                   : white
+;   display                 : flex
+}
+
+.jpMenu {
+;   padding                 : 16px
+}
+.jpMenuSub {
+;   display                 : none
+;   position                : absolute
+;   background-color        : white
+;   color                   : midnightblue
+;   min-width               : 160px
+;   box-shadow              : 0px 8px 16px 0px rgba( 0, 0, 0, 0.2 )
+}
+
+.jpMenu:hover {
+;   background-color        : mediumblue
+}
+.jpMenu:hover .jpMenuSub {
+;   display                 : block
+}
+
+.jpMenuSubItem {
+;   padding                 : 12px 16px
+}
+.jpMenuSubItem:hover {
+;   background-color        : whitesmoke
+}
+/*                                                  ^^  JP MENU BAR */
+</style>
+
+
+<script type=module>
+    class
+    JPMenuBar extends HTMLElement {
+        constructor() {
+            super()
+            this.classList.add( 'jpMenuBar' )
+        }
+        static get observedAttributes() {
+            return [ 'json' ]
+        }
+        attributeChangedCallback( name, oldValue, newValue ) {
+            if ( name !== 'json' ) throw 'eh?'
+            JSON.parse( newValue ).forEach(
+                _ => {
+                    const
+                    menu = this.appendChild( document.createElement( 'div' ) )
+                    menu.classList.add( 'jpMenu' )
+                    menu.textContent = _.text
+                    const
+                    sub = menu.appendChild( document.createElement( 'div' ) )
+                    sub.classList.add( 'jpMenuSub' )
+                    _.menu.forEach(
+                        _ => {
+                            const
+                            menu = sub.appendChild( document.createElement( 'div' ) )
+                            menu.classList.add( 'jpMenuSubItem' )
+
+                            menu.textContent = _
+                        }
+                    )
+                }
+            )
+        }
+    }
+    customElements.define( 'jp-menu-bar', JPMenuBar )
+</script>
+
+<jp-menu-bar json='[
+    {   "text": "MenuItem 1"
+    ,   "menu": [
+            "SubMenuItem 1-1"
+        ,   "SubMenuItem 1-2"
+        ,   "SubMenuItem 1-3"
+        ]
+    }
+,   {   "text": "MenuItem 2"
+    ,   "menu": [
+            "SubMenuItem 2-1"
+        ,   "SubMenuItem 2-2"
+        ,   "SubMenuItem 2-3"
+        ]
+    }
+]'></jp-menu-bar>

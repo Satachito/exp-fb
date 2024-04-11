@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang=ja>
+<head>
+<meta charset=UTF-8>
+<meta name=viewport content="width=device-width, initial-scale=1.0">
+
+<title>ChartVerse</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<link rel="stylesheet" href="./styles.css">
+
+<template	id=T_HOME>
+	<h2 class=danger style="padding: 12px">This site is a mock service designed to offer technical information about software development. It does not provide any valuable investment advice.
+	</h2>
+</template>
+
+<template	id=T_STOCK	><h1 class=pad10>Stock investment	</h1></template>
+<template	id=T_FX		><h1 class=pad10>Foreign exchange	</h1></template>
+<template	id=T_METAL	><h1 class=pad10>Precious metal		</h1></template>
+<template	id=T_CRYPTO	><h1 class=pad10>Crypto currency	</h1></template>
+
+<template	id=T_404	><h1 class=pad10>404:Not found		</h1></template>
+</head>
+
+<body>
+<header>
+	<div style="display: inline-block"><div>Chart Verse</div><div class=fs10>Your Investment Galaxy</div></div>
+	<select	id=LANGUAGE_S	class=floatRight>
+		<option value=en>en:English</option>
+		<option value=ja>ja:日本語</option>
+	</select>
+	<button	id=USER_B		class=floatRight></button>
+	<button	id=HOME_B		class=floatRight><i class="fas fa-home"></i></button>
+</header>
+
+<nav>
+	<button	id=STOCK_B		></button>
+	<button	id=FX_B			></button>
+	<button	id=METAL_B		></button>
+	<button	id=CRYPTO_B		></button>
+</nav>
+
+<main></main>
+
+<footer style="font: 10px cursive">(C) SliP LLC, Tokyo</footer>
+
+
+<dialog	id=MY_D>
+
+	<i class="fa fa-close floatRight"></i><br>
+
+	<div	id=EMAIL 		class=center ></div>
+	<div	id=DISPLAY_NAME	class=center ></div>
+	<div	id=PROVIDERS	class=center hidden></div>
+
+	<button	id=LOGOUT_B></button>
+	<br>
+	<hr>
+	<button	id=DELETE_B	class=danger></button>
+</dialog>
+
+<dialog	id=LOGIN_D>
+	<i class="fa fa-close floatRight"></i><br>
+	<input	id=EMAIL_I		type=email		placeholder=email		autocomplete=username		>
+	<input	id=PASSWORD_I	type=password	placeholder=password	autocomplete=new-password	>
+	<button	id=EMAIL_LOGIN_B	></button>
+	<button	id=REGISTER_EMAIL_B	></button>
+
+	<span	id=FORGOT_PASSWORD	></span>
+
+	<button	id=RESET_PASSWORD_B	></button>
+	<br>
+	<hr>
+	<br>
+	<button	id=GOOGLE_LOGIN_B	></button>
+	<button	id=FACEBOOK_LOGIN_B	></button>
+	<button	id=GITHUB_LOGIN_B	></button>
+</dialog>
+
+<script type=module src=./index.js></script>
+
+</body>
+</html>
+

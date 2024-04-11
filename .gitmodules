@@ -1,0 +1,3 @@
+[submodule "public/JP"]
+	path = public/JP
+	url = https://github.com/Satachito/JP

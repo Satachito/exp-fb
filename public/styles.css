@@ -1,0 +1,118 @@
+.firebase-emulator-warning {
+;	opacity				: 0.1
+}
+
+*, *::before, *::after {
+;	box-sizing			: border-box
+}
+
+button, input, textarea {
+;	font-family			: inherit
+}
+
+button, input, select {
+;	padding				: 8px 12px
+;	border-radius		: 4px
+}
+
+button {
+;	cursor				: pointer
+;	border				: none
+;	background-color	: blueviolet
+;	color				: white
+}
+button:hover {
+;	background-color	: mediumpurple
+}
+
+input {
+;	border				: 1px solid mediumpurple
+}
+input:focus {
+;	border				: 0
+;	outline				: 1px solid indigo
+}
+
+i {
+;	cursor				: pointer
+}
+
+body {
+;	height				: 100vh
+;	margin				: 0
+;	display				: grid
+;	grid-template-rows	: auto auto 1fr auto
+}
+
+header {
+;	background-color	: black
+;	color				: white
+;	padding				: 12px 20px 10px 20px
+}
+
+nav {
+;	background-color	: lightgray
+;	padding				: 10px
+;	border-bottom		: 1px solid indigo
+}
+
+main {
+;	width				: 100%
+;	height				: 100%
+}
+
+footer {
+;	border-top			: 1px solid indigo
+;	padding				: 0 10px
+}
+
+iframe {
+;	border				: 0
+;	width				: 100%
+;	height				: 100%
+}
+
+dialog {
+;	border				: 1px solid lightgray
+;	border-radius		: 5px
+;	padding				: 32px
+;	width				: 320px
+;	box-shadow			: 0 4px 8px rgba( 0, 0, 0, 0.1 )
+}
+dialog > input, dialog > button {
+;	width				: 100%
+;	margin				: 10px 0
+}
+
+.floatRight {
+;	float				: right
+;	margin-left			: 8px
+}
+
+.center {
+;	text-align			: center
+}
+
+.danger {
+;	font-weight			: bold
+;	background-color	: red
+;	color				: white
+}
+
+.pad10 {
+;	padding				: 10px
+}
+
+.fs10 {
+;	font-size			: 10px
+}
+
+#FORGOT_PASSWORD {
+;	font-size			: 12px
+}
+
+#EMAIL {
+;	color				: indigo
+;	font-size			: 20px
+;	margin-bottom		: 10px
+}

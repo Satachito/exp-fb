@@ -1,0 +1,310 @@
+<script type=module>
+//	if ( window === window.top ) location.href = '/crypt'
+</script>
+
+
+<style>
+
+.firebase-emulator-warning {
+;	display				: none
+}
+
+.fs8 {
+;	font-size			: 8px
+}
+.fs12 {
+;	font-size			: 12px
+}
+.fs16 {
+;	font-size			: 16px
+}
+
+body {
+;	height				: 100vh
+;	margin				: 0
+;	display				: grid
+;	grid-template-rows	: auto 1fr auto
+}
+
+header {
+;	border-bottom		: 1px solid black
+;	padding				: 0 10px
+}
+
+footer {
+;	border-top			: 1px solid black
+;	padding				: 0 10px
+}
+
+main {
+;	overflow			: scroll
+;	position			: relative
+;	background-color	: #eef
+}
+
+canvas {
+;	position			: absolute
+;	top					: 0
+;	left				: 0
+}
+.fs12 {
+;	font-size	: 12px
+}
+.fs16 {
+;	font-size	: 16px
+}
+</style>
+
+<header>
+	<select id=SYMBOL_SEL>
+		<option value=BTC>BTC</option>
+		<option value=ETH>ETH</option>
+		<option value=XPR>XPR</option>
+	</select>
+
+	<select id=INTERVAL_SEL>
+		<option value=1min		>1min	</option>
+		<option value=5min		>5min	</option>
+		<option value=10min		>10min	</option>
+		<option value=15min		>15min	</option>
+		<option value=30min		>30min	</option>
+		<option value=1hour		>1hour	</option>
+		<option value=4hour		>4hour	</option>
+		<option value=8hour		>8hour	</option>
+		<option value=12hour	>12hour	</option>
+		<option value=1day		>1day	</option>
+		<option value=1week		>1week	</option>
+		<option value=1month	>1month	</option>
+	</select>
+
+	<input id=DATE_I placeholder=20240101>
+
+	太さ：
+	<select id=BOLD_SEL>
+		<option>2</option>
+		<option>3</option>
+		<option>4</option>
+	</select>
+
+	<button id=FETCH_B>FETCH</button>
+
+</header>
+
+<main id=MAIN>
+<canvas id=MAIN_C width=0 height=256></canvas>
+<canvas id=CTRL_C width=0 height=256></canvas>
+</main>
+
+<footer>
+	<span id=SPAN_S	class=fs12></span>
+	始<span id=OPEN_S	class=fs12></span>
+	高<span id=HIGH_S	class=fs12></span>
+	安<span id=LOW_S	class=fs12></span>
+	終<span id=CLOSE_S	class=fs12></span>
+</footer>
+
+<script type=module>
+
+const
+L = _ => _[ _.length - 1 ]
+
+////////////////////////////////////////////////////////////////	v	Auth
+
+import {
+	GetIdToken
+,	OnAuthStateChanged
+} from './JP/JS/firebase.js'
+
+const
+now = new Date()
+DATE_I.value = now.getFullYear() * 10000 + ( now.getMonth() + 1 ) * 100 + now.getDate()
+
+const
+Draw = _ => {
+
+	MAIN_C.height = CTRL_C.height = parseInt( getComputedStyle( MAIN ).height )
+
+	const
+	$ = _[ 0 ].data
+
+	const
+	xSpan = {
+		'1min'		: 60000
+	,	'5min'		: 60000 * 5
+	,	'10min'		: 60000 * 10
+	,	'15min'		: 60000 * 15
+	,	'30min'		: 60000 * 30
+	,	'1hour'		: 60000 * 60
+	,	'4hour'		: 60000 * 240
+	,	'8hour'		: 60000 * 480
+	,	'12hour'	: 60000 * 720
+	,	'1day'		: 60000 * 1440
+	,	'1week'		: 60000 * 1440 * 7
+	,	'1month'	: 60000 * 1440 * 30	//	UC
+	}[ INTERVAL_SEL.value ]
+
+	const
+	startTime = $[ 0 ].openTime
+
+	const
+	nX = Math.round( ( L( $ ).openTime - startTime ) / xSpan ) + 1
+
+	const
+	BOLD = Number( BOLD_SEL.value )
+	const
+	BOLD_2_1 = BOLD * 2 + 1
+	const
+	BOLD_2_2 = BOLD_2_1 + 1
+
+	MAIN_C.width = CTRL_C.width = nX * BOLD_2_2 + 100
+
+	const
+	X = _ => Math.round( ( $[ _ ].openTime - startTime ) / xSpan )
+
+
+	const
+	max = Math.max( ...$.map( _ => _.high	) )
+	const
+	min = Math.min( ...$.map( _ => _.low	) )
+	const
+	scale = MAIN_C.height / ( max - min )
+
+	const
+	Y = _ => scale * ( _ - min )
+
+
+	const
+	c2D = MAIN_C.getContext( '2d' )
+
+	c2D.save()
+	c2D.translate( 0, MAIN_C.height )
+	c2D.scale( 1, -1 )
+
+	let
+	prevX = 0
+	const
+	indices = Array( nX ).fill( 0 )
+
+	$.forEach(
+		( $, _ ) => {
+
+			const
+			x = X( _ )
+
+			if ( $.open < $.close ) {
+				c2D.fillStyle = 'green'
+				const
+				openY = Math.floor( Y( $.open ) )
+				c2D.fillRect( x * BOLD_2_2, openY, BOLD_2_1, Math.ceil( Y( $.close ) ) - openY )
+			} else {
+				c2D.fillStyle = 'red'
+				const
+				closeY = Math.floor( Y( $.close ) )
+				c2D.fillRect( x * BOLD_2_2, closeY, BOLD_2_1, Math.ceil( Y( $.open ) ) - closeY )
+			}
+
+			const
+			lowY = Math.floor( Y( $.low ) )
+			c2D.fillRect( x * BOLD_2_2 + BOLD, lowY, 1, Math.ceil( Y( $.high ) ) - lowY )
+
+			while ( prevX <= x ) indices[ prevX++ ] = _
+		}
+	)
+
+	c2D.restore()
+
+	const	//	Converts a string representation of UNIX epoch time to a locale time string.
+	TimeStr = _ => new Date( Number( _ ) ).toLocaleString()
+
+	SPAN_S	.textContent = TimeStr( $[ 0 ].openTime ) + ' - ' + TimeStr( L( $ ).openTime )
+
+	const
+	NumStr = _ => Number( _ ).toLocaleString()
+
+	OPEN_S	.textContent = NumStr( $[ 0 ].open	)
+	CLOSE_S	.textContent = NumStr( L( $ ).close	)
+	HIGH_S	.textContent = max.toLocaleString()
+	LOW_S	.textContent = min.toLocaleString()
+
+	let
+	DFIS	//	Date string for time interval
+
+	switch ( INTERVAL_SEL.value ) {
+	case '1min'		:
+	case '5min'		:
+	case '10min'	:
+	case '15min'	:
+	case '30min'	:
+	case '1hour'	:
+		DFIS = _ => TimeStr( _ ).split( ' ' )[ 1 ]
+		break
+	case '1day'		:
+	case '1week'	:
+	case '1month'	:
+		DFIS = _ => TimeStr( _ ).split( ' ' )[ 0 ]
+		break
+	case '4hour'	:
+	case '8hour'	:
+	case '12hour'	:
+		DFIS = _ => TimeStr( _ )
+		break
+	}
+
+	CTRL_C.onmousemove = ev => {
+		const
+		c2D = CTRL_C.getContext( '2d' )
+		c2D.clearRect( 0, 0, CTRL_C.width, CTRL_C.height )
+		const
+		_ = $[ indices[ Math.floor( ev.offsetX / BOLD_2_2 ) ] ]
+		_ && c2D.fillText( DFIS( _.openTime ) + ':' + NumStr( _.low ) + ':' + NumStr( _.high ), ev.offsetX, ev.offsetY )
+	}
+}
+
+OnAuthStateChanged(
+	user => FETCH_B.disabled = !user
+)
+FETCH_B.onclick = () => GetIdToken().then(
+	async token => {
+
+		switch ( INTERVAL_SEL.value ) {
+		case '4hour'	:
+		case '8hour'	:
+		case '12hour'	:
+		case '1day'		:
+		case '1week'	:
+		case '1month'	:
+			DATE_I.value = DATE_I.value.substring( 0, 4 )
+			break
+		}
+
+		const
+		kLinesQuery = `?symbol=${ SYMBOL_SEL.value }&interval=${ INTERVAL_SEL.value }&date=${ DATE_I.value }`
+		const
+		urls = location.hostname === 'localhost'
+		?	[	'http://localhost:5001/exp-fb-c223c/us-central1/klinesGMOCoin' + kLinesQuery 
+			,	'http://localhost:5001/exp-fb-c223c/us-central1/goldpark'
+			]
+		:	[	'https://klinesGMOCoin-jmabzvke5a-uc.a.run.app' + kLinesQuery 
+			,	'https://goldpark-jmabzvke5a-uc.a.run.app'
+			]
+
+console.log( 'TOKEN:', token )
+		Promise.all(
+			urls.map(
+				_ => fetch( _, { headers: { 'Authorization': 'Bearer ' + token } } ).then(
+					async _ => {
+						if ( !_.ok ) throw new Error( `HTTP error, status:${ _.status } : ${ await _.text() }` )
+						return _.json()
+					}
+				)
+			)
+		).then(
+			_ => Draw( _ )
+		).catch(
+			_ => alert( _.message )
+		)
+	}
+)
+
+</script>
+
