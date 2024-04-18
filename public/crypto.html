@@ -108,13 +108,6 @@ canvas {
 const
 L = _ => _[ _.length - 1 ]
 
-////////////////////////////////////////////////////////////////	v	Auth
-
-import {
-	GetIdToken
-,	OnAuthStateChanged
-} from './JP/JS/firebase.js'
-
 const
 now = new Date()
 DATE_I.value = now.getFullYear() * 10000 + ( now.getMonth() + 1 ) * 100 + now.getDate()
@@ -260,6 +253,25 @@ Draw = _ => {
 	}
 }
 
+////////////////////////////////////////////////////////////////	v	Auth
+
+import {
+	InitializeApp
+,	GetIdToken
+,	OnAuthStateChanged
+} from './JP/JS/firebase.js'
+
+InitializeApp(
+	{	apiKey				: 'AIzaSyDWQvp05ky9-KqeQ6JjTVnB0uoJTdA6LK4'
+	,	authDomain			: 'exp-fb-c223c.firebaseapp.com'
+	,	projectId			: 'exp-fb-c223c'
+	,	storageBucket		: 'exp-fb-c223c.appspot.com'
+	,	messagingSenderId	: '1046625556668'
+	,	appId				: '1:1046625556668:web:86e0b84397eb59b27018b9'
+	,	measurementId		: 'G-NLBQYBPKPD'
+	}
+)
+
 OnAuthStateChanged(
 	user => FETCH_B.disabled = !user
 )
@@ -281,14 +293,13 @@ FETCH_B.onclick = () => GetIdToken().then(
 		kLinesQuery = `?symbol=${ SYMBOL_SEL.value }&interval=${ INTERVAL_SEL.value }&date=${ DATE_I.value }`
 		const
 		urls = location.hostname === 'localhost'
-		?	[	'http://localhost:5001/exp-fb-c223c/us-central1/klinesGMOCoin' + kLinesQuery 
-			,	'http://localhost:5001/exp-fb-c223c/us-central1/goldpark'
+		?	[	'http://127.0.0.1:5001/exp-fb-c223c/us-central1/klinesGMOCoin' + kLinesQuery 
+		//	,	'http://127.0.0.1:5001/exp-fb-c223c/us-central1/goldpark'
 			]
 		:	[	'https://klinesGMOCoin-jmabzvke5a-uc.a.run.app' + kLinesQuery 
-			,	'https://goldpark-jmabzvke5a-uc.a.run.app'
+		//	,	'https://goldpark-jmabzvke5a-uc.a.run.app'
 			]
 
-console.log( 'TOKEN:', token )
 		Promise.all(
 			urls.map(
 				_ => fetch( _, { headers: { 'Authorization': 'Bearer ' + token } } ).then(

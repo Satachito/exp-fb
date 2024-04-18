@@ -1,9 +1,12 @@
 const
-admin	= require( 'firebase-admin'				)
+fetch = require( 'node-fetch' )
+
+const
+admin = require( 'firebase-admin' )
 admin.initializeApp()
 
 const
-fs		= admin.firestore()
+fs = admin.firestore()
 
 const {
 	log
@@ -33,7 +36,7 @@ CorsAuth = _ => onRequest(
 			)
 		:	q.headers.authorization
 			?	admin.auth().verifyIdToken( q.headers.authorization.split( 'Bearer ' )[ 1 ] ).then(
-					token => _( q, s, token ).catch(
+					user => _( q, s ).catch(
 						er => s.status( 502 ).send( er.message )
 					)
 				).catch( 
@@ -42,39 +45,6 @@ CorsAuth = _ => onRequest(
 			:	s.status( 403 ).send( 'no auth' )
 	)
 )
-
-/*
-//	async/await Version
-const
-CorsAuth = _ => onRequest(
-	async ( q, s ) => {
-
-console.log( q.method )
-		s.set( 'Access-Control-Allow-Origin', '*' )
-		if ( q.method === 'OPTIONS' ) {
-			s.set( 'Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization' )
-			s.set( 'Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE' )
-			s.status( 200 ).end()
-			return
-		}
-
-		if ( !q.headers.authorization ) {
-			s.status( 403 ).send( 'no auth' )
-			return
-		}
-
-		const
-		token = await admin.auth().verifyIdToken( q.headers.authorization.split( 'Bearer ' )[ 1 ] ).catch(
-			er => ( s.status( 403 ).send( 'invalid Bearer' ), null )	//	これやだよなー
-		)
-		if ( !token ) return
-
-		_( q, s, token ).catch(
-			_ => s.status( 502 ).send( _.message )
-		)
-	}
-)
-*/
 
 //	CHECK 済み
 //	403	q.headers.authorization がない
@@ -86,7 +56,7 @@ console.log( q.method )
 const
 Fetch = url => fetch( url ).then(
 	_ => {
-		if ( !_.ok  ) throw new Error( _.statusText )
+		if ( !_.ok  ) throw new Error( url + ':' + _.status )
 		return _
 	}
 )
@@ -96,19 +66,19 @@ const
 FetchTEXT = url => Fetch( url ).then( _ => _.text() )
 
 exports.tickerGMOCoin	= CorsAuth(
-	( q, s, token ) => FetchJSON( 'https://api.coin.z.com/public/v1/ticker' ).then(
+	( q, s ) => FetchJSON( 'https://api.coin.z.com/public/v1/ticker' ).then(
 		_ => s.send( _ )
 	)
 )
 
 exports.klinesGMOCoin	= CorsAuth(
-	( q, s, token ) => FetchJSON( 'https://api.coin.z.com/public/v1/klines?' + q.originalUrl.split( '?' )[ 1 ] ).then(
+	( q, s ) => FetchJSON( 'https://api.coin.z.com/public/v1/klines?' + q.originalUrl.split( '?' )[ 1 ] ).then(
 		_ => s.send( _ )
 	)
 )
 
 exports.goldpark		= CorsAuth(
-	( q, s, token ) => fs.collection( 'mmc' ).get().then(
+	( q, s ) => fs.collection( 'mmc' ).get().then(
 		_ => s.send( _.docs.map( _ => _.data().html ) )
 	)
 )
