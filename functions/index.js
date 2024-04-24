@@ -56,7 +56,7 @@ CorsAuth = _ => onRequest(
 const
 Fetch = url => fetch( url ).then(
 	_ => {
-		if ( !_.ok  ) throw new Error( url + ':' + _.status )
+		if ( !_.ok ) throw new Error( url + ':' + _.status )
 		return _
 	}
 )
